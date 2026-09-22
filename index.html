@@ -1,0 +1,275 @@
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>LocusLoop</title>
+  <meta
+    name="description"
+    content="LocusLoop - simple tools for development and testing."
+  />
+
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #174994;
+      --primary-hover: #103974;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 720px;
+    }
+
+    .logo {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .logo h1 {
+      margin: 0;
+      font-size: 42px;
+      letter-spacing: -1.5px;
+      color: var(--primary);
+    }
+
+    .logo p {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 32px;
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.05);
+    }
+
+    .card h2 {
+      margin-top: 0;
+      margin-bottom: 8px;
+      font-size: 22px;
+    }
+
+    .card p {
+      margin-top: 0;
+      margin-bottom: 24px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .email-box {
+      display: flex;
+      gap: 10px;
+    }
+
+    .email-output {
+      flex: 1;
+      min-width: 0;
+      padding: 14px 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: #fafafa;
+      font-family: Consolas, Monaco, monospace;
+      font-size: 15px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s ease;
+    }
+
+    .copy-btn {
+      background: #eef2f7;
+      color: var(--text);
+    }
+
+    .copy-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .generate-btn {
+      width: 100%;
+      margin-top: 14px;
+      background: var(--primary);
+      color: white;
+    }
+
+    .generate-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    .status {
+      min-height: 22px;
+      margin-top: 14px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .footer {
+      margin-top: 24px;
+      text-align: center;
+      color: #9ca3af;
+      font-size: 12px;
+    }
+
+    @media (max-width: 600px) {
+      .logo h1 {
+        font-size: 34px;
+      }
+
+      .card {
+        padding: 24px;
+      }
+
+      .email-box {
+        flex-direction: column;
+      }
+
+      .copy-btn {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header class="logo">
+      <h1>LocusLoop</h1>
+      <p>Simple tools for development and testing.</p>
+    </header>
+
+    <section class="card">
+      <h2>Test Email Generator</h2>
+
+      <p>
+        Generate a random address under
+        <strong>@locusloop.me</strong>
+        for your own development and testing workflows.
+      </p>
+
+      <div class="email-box">
+        <div
+          id="emailOutput"
+          class="email-output"
+          title="Generated test email"
+        >
+          loading...
+        </div>
+
+        <button
+          class="copy-btn"
+          onclick="copyEmail()"
+        >
+          Copy
+        </button>
+      </div>
+
+      <button
+        class="generate-btn"
+        onclick="generateEmail()"
+      >
+        Generate New Address
+      </button>
+
+      <div
+        id="status"
+        class="status"
+      ></div>
+    </section>
+
+    <footer class="footer">
+      © <span id="year"></span> LocusLoop
+    </footer>
+  </main>
+
+  <script>
+    const domain = "locusloop.me";
+
+    function randomString(length = 12) {
+      const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+      const array = new Uint32Array(length);
+
+      crypto.getRandomValues(array);
+
+      return Array.from(array, value => {
+        return chars[value % chars.length];
+      }).join("");
+    }
+
+    function generateEmail() {
+      const timestamp = Date.now().toString(36);
+      const random = randomString(8);
+
+      const email = `test-${timestamp}-${random}@${domain}`;
+
+      document.getElementById("emailOutput").textContent = email;
+      document.getElementById("status").textContent = "";
+    }
+
+    async function copyEmail() {
+      const email =
+        document.getElementById("emailOutput").textContent;
+
+      try {
+        await navigator.clipboard.writeText(email);
+
+        document.getElementById("status").textContent =
+          "Copied to clipboard ✓";
+
+        setTimeout(() => {
+          document.getElementById("status").textContent = "";
+        }, 1800);
+      } catch (error) {
+        document.getElementById("status").textContent =
+          "Copy failed. Please copy manually.";
+      }
+    }
+
+    document.getElementById("year").textContent =
+      new Date().getFullYear();
+
+    generateEmail();
+  </script>
+</body>
+</html>
+```
